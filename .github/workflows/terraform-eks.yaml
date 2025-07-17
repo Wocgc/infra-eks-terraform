@@ -1,8 +1,8 @@
-name: Terraform CI/CD - EKS
+name: Terraform CI - EKS
 
 on:
   workflow_run:
-    workflows: ["Terraform CI/CD - Base"]
+    workflows: ["Terraform CI - Base"]
     types:
       - completed
 
