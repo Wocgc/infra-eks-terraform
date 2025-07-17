@@ -36,10 +36,10 @@ jobs:
         id: apply-cluster
         run: terraform apply --auto-approve
         working-directory: terraform/eks
-        continue-on-error: true  # 💥 실패 감지용
+        continue-on-error: true  
 
       - name: Destroy Cluster if Apply Failed
-        if: steps.apply-cluster.outcome == 'failure'  # 💥 실패했을 때만 실행
+        if: steps.apply-cluster.outcome == 'failure'  
         run: terraform destroy --auto-approve
         working-directory: terraform/eks
 
