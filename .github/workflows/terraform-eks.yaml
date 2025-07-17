@@ -1,0 +1,85 @@
+name: Terraform CI/CD - EKS
+
+on:
+  workflow_run:
+    workflows: ["Terraform CI/CD - Base"]
+    types:
+      - completed
+
+jobs:
+  terraform-cluster:
+    name: Step 1 - Create EKS Cluster Only
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Terraform Init (cluster)
+        run: terraform init -input=false -upgrade -reconfigure
+        working-directory: terraform/eks
+
+      - name: Terraform Apply - EKS Cluster Only
+        id: apply-cluster
+        run: terraform apply --auto-approve
+        working-directory: terraform/eks
+        continue-on-error: true  # 💥 실패 감지용
+
+      - name: Destroy Cluster if Apply Failed
+        if: steps.apply-cluster.outcome == 'failure'  # 💥 실패했을 때만 실행
+        run: terraform destroy --auto-approve
+        working-directory: terraform/eks
+
+  terraform-nodegroup:
+    name: Step 2 - Create NodeGroup
+    needs: terraform-cluster
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Terraform Init (nodegroup)
+        run: terraform init -input=false -upgrade -reconfigure
+        working-directory: terraform/eks
+
+      - name: Terraform Plan - NodeGroup
+        run: terraform plan -no-color -compact-warnings
+        working-directory: terraform/eks
+
+
+      - name: Terraform Apply - NodeGroup
+        id: apply-nodegroup
+        run: terraform apply --auto-approve
+        working-directory: terraform/eks
+        continue-on-error: true  
+
+      - name: Destroy NodeGroup if Apply Failed
+        if: steps.apply-nodegroup.outcome == 'failure'  
+        run: terraform destroy --auto-approve
+        working-directory: terraform/eks
