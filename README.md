@@ -39,7 +39,7 @@ Terraform과 GitHub Actions를 활용하여 AWS 클라우드 환경에
 |------------------|------|
 | `terraform/base` | VPC, 서브넷, NATGW, EC2(Mgmt), RDS 등 베이스 인프라 |
 | `terraform/eks`  | EKS 클러스터 및 NodeGroup 구성 |
-| CI Workflow      | GitHub Actions 기반 Plan/Apply 자동화 |
+| `CI Workflow`      | GitHub Actions 기반 Plan/Apply 자동화 |
 
 ---
 
