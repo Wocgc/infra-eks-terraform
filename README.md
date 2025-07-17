@@ -29,7 +29,7 @@ Terraform과 GitHub Actions를 활용하여 AWS 클라우드 환경에
 
 - **Terraform** 1.6.6
 - **AWS**: VPC, EC2, RDS, EKS
-- **GitHub Actions**: CI/CD 자동화
+- **GitHub Actions**: CI 자동화
 
 ---
 
